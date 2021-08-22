@@ -45,10 +45,10 @@ RUN pecl channel-update pecl.php.net \
     --with-jpeg-dir=/usr/include/ \
     --with-freetype-dir=/usr/include/ \
     && docker-php-ext-install -j$(nproc) zip bz2 bcmath mysqli pdo_mysql gd gmp sockets pcntl sysvmsg sysvsem sysvshm \
-    && pecl install mongodb \
-    && docker-php-ext-enable mongodb \
-    && pecl install memcached \
-    && docker-php-ext-enable memcached \
+    # && pecl install mongodb \
+    # && docker-php-ext-enable mongodb \
+    # && pecl install memcached \
+    # && docker-php-ext-enable memcached \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && pecl install imagick \
@@ -71,20 +71,20 @@ RUN if [ ${INSTALL_XDEBUG} = true ]; then \
 ;fi
 	
 # install swoole extention
-ARG SWOOLE_VERSION
-RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VERSION}.tar.gz -O swoole.tar.gz \
-    && mkdir -p swoole \
-    && tar -xf swoole.tar.gz -C swoole --strip-components=1 \
-    && rm swoole.tar.gz \
-    && ( \
-        cd swoole \
-        && phpize \
-        && ./configure --enable-mysqlnd --enable-openssl \
-        && make -j$(nproc) \
-        && make install \
-    ) \
-    && rm -r swoole \
-    && docker-php-ext-enable swoole
+# ARG SWOOLE_VERSION
+# RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VERSION}.tar.gz -O swoole.tar.gz \
+#     && mkdir -p swoole \
+#     && tar -xf swoole.tar.gz -C swoole --strip-components=1 \
+#     && rm swoole.tar.gz \
+#     && ( \
+#         cd swoole \
+#         && phpize \
+#         && ./configure --enable-mysqlnd --enable-openssl \
+#         && make -j$(nproc) \
+#         && make install \
+#     ) \
+#     && rm -r swoole \
+#     && docker-php-ext-enable swoole
 
 # install composer
 RUN curl -sfL --connect-timeout 5 --max-time 15 --retry 5 --retry-delay 2 --retry-max-time 60 https://install.phpcomposer.com/installer | php -- --install-dir="/usr/bin" --filename=composer \
@@ -95,6 +95,8 @@ RUN curl -sfL --connect-timeout 5 --max-time 15 --retry 5 --retry-delay 2 --retr
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     rm /var/log/lastlog /var/log/faillog
+
+RUN  chown -R www-data:www-data /var/www
 
 EXPOSE 9000
 CMD ["php-fpm"]
